@@ -18,27 +18,30 @@ siguientes métodos
 MemoryGame = function(gs) {
 
 	this.arrayCartas = [];
-	
-
+	this.grafic = gs;
 	this.initGame = function () {
-		console.log("hola");
-		// for (i = 0; i < 16; i+=2) { 
-		//     this.arrayCartas[i] = gs.maps["guy"];
-		//     this.arrayCartas[i+1] = gs.maps["guy"];
-		// }
-		
+		this.cartasPosibles =["8-ball","dinosaur","guy","kronos","potato","rocket","unicorn","zeppelin"];
+		for (i = 0; i < 16; i+=2) { 
+			this.arrayCartas[i] = new MemoryGameCard(this.cartasPosibles[i/2]);
+		 	this.arrayCartas[i+1] = new MemoryGameCard(this.cartasPosibles[i/2]);
+		}
+		this.loop();
 	};
 
-	/*this.onClick = function () {
-		console.log("Hola");
-	};*/
+	this.loop = function () {
+		setInterval(this.draw,10000);
+	};
 
-	/*this.initGame = function () {
-		console.log("Hola");
-	};*/
+	this.draw = function () {
+		console.log(arrayCartas[0].valor);
+		//this.grafic.draw(this.arrayCartas[0].valor,0);
+		/*for (i = 0; i < 16; i++) { 
+
+			this.grafic.draw(this.arrayCartas[i].valor,i);
+		}*/
+	};
 
 };
-
 
 
 /**
