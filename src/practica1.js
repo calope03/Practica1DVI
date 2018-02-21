@@ -25,7 +25,7 @@ MemoryGame = function(gs) {
 
 	this.initGame = function () {
 		this.cartasPosibles =["8-ball","dinosaur","guy","kronos","potato","rocket","unicorn","zeppelin"];
-		for (i = 0; i < 16; i+=2) { 
+		for (var i = 0; i < 16; i+=2) { 
 			this.arrayCartas[i] = new MemoryGameCard(this.cartasPosibles[i/2]);
 		 	this.arrayCartas[i+1] = new MemoryGameCard(this.cartasPosibles[i/2]);
 		}
@@ -42,7 +42,7 @@ MemoryGame = function(gs) {
 		//console.log(this.arrayCartas[0].valor);
 		//this.grafic.draw(this.arrayCartas[0].valor,0);
 		this.grafic.drawMessage(this.estadopartida);
-		for (i = 0; i < 16; i++) { 
+		for (var i = 0; i < 16; i++) { 
 			if(this.arrayCartas[i].estado == "bocabajo"){
 				this.grafic.draw("back",i);
 			}else{
@@ -60,7 +60,7 @@ MemoryGame = function(gs) {
 		this.cartavolteada++;
 		this.posotraCarta;
 		if(this.cartavolteada == 2){
-			for (i = 0; i < 16; i++) { 
+			for (var i = 0; i < 16; i++) { 
 				if((this.arrayCartas[i].estado=="bocarriba")&&(this.arrayCartas[this.carta]!= this.arrayCartas[i])){
 					this.posotraCarta = i;
 				}		
@@ -68,7 +68,7 @@ MemoryGame = function(gs) {
 			this.arrayCartas[this.carta].compareTo(this.arrayCartas[this.posotraCarta]);
 			if(this.arrayCartas[this.carta].estado!="encontrada"){
 				//window.releaseEvents(Event.CLICK)
-				setTimeout(volteardos.bind(this), 1000);
+				setTimeout(volteardos.bind(this), 500);
 				//window.captureEvents(Event.CLICK)
 				this.estadopartida="Try Again";
 				/*this.arrayCartas[this.carta].flip();
