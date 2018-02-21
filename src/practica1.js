@@ -22,12 +22,14 @@ MemoryGame = function(gs) {
 	this.cartavolteada =0;
 	this.estadopartida = "Memory Game";
 	this.cartasEncontradas = 0;
+
 	this.initGame = function () {
 		this.cartasPosibles =["8-ball","dinosaur","guy","kronos","potato","rocket","unicorn","zeppelin"];
 		for (i = 0; i < 16; i+=2) { 
 			this.arrayCartas[i] = new MemoryGameCard(this.cartasPosibles[i/2]);
 		 	this.arrayCartas[i+1] = new MemoryGameCard(this.cartasPosibles[i/2]);
 		}
+		this.arrayCartas = shuffle(this.arrayCartas);
 		this.loop();
 	};
 
@@ -65,7 +67,9 @@ MemoryGame = function(gs) {
 			}
 			this.arrayCartas[this.carta].compareTo(this.arrayCartas[this.posotraCarta]);
 			if(this.arrayCartas[this.carta].estado!="encontrada"){
+				//window.releaseEvents(Event.CLICK)
 				setTimeout(volteardos.bind(this), 1000);
+				//window.captureEvents(Event.CLICK)
 				this.estadopartida="Try Again";
 				/*this.arrayCartas[this.carta].flip();
 				this.arrayCartas[posotraCarta].flip();*/
@@ -78,16 +82,23 @@ MemoryGame = function(gs) {
 		if(this.cartasEncontradas==16){
 			this.estadopartida="You Win";
 		}
+
 		volteardos = function(){
 			this.arrayCartas[this.carta].flip();
 			this.arrayCartas[this.posotraCarta].flip();
 		};
-		
 	};
-
-
 };
 
+function shuffle(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+    return array;
+ }
 
 /**
  * Constructora de las cartas del juego. Recibe como parámetro el nombre del sprite que representa la carta.
