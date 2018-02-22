@@ -19,28 +19,26 @@ MemoryGame = function(gs) {
 
 	this.arrayCartas = [];
 	this.grafic = gs;
-	this.cartavolteada =0;
+	this.cartavolteada = 0;
 	this.estadopartida = "Memory Game";
 	this.cartasEncontradas = 0;
+	this.espera = false;
 
 	this.initGame = function () {
-		this.cartasPosibles =["8-ball","dinosaur","guy","kronos","potato","rocket","unicorn","zeppelin"];
+		var cartasPosibles =["8-ball","dinosaur","guy","kronos","potato","rocket","unicorn","zeppelin"];
 		for (var i = 0; i < 16; i+=2) { 
-			this.arrayCartas[i] = new MemoryGameCard(this.cartasPosibles[i/2]);
-		 	this.arrayCartas[i+1] = new MemoryGameCard(this.cartasPosibles[i/2]);
+			this.arrayCartas[i] = new MemoryGameCard(cartasPosibles[i/2]);
+		 	this.arrayCartas[i+1] = new MemoryGameCard(cartasPosibles[i/2]);
 		}
 		this.arrayCartas = shuffle(this.arrayCartas);
 		this.loop();
 	};
 
 	this.loop = function () {
-		//console.log(this.arrayCartas[0].valor);
 		setInterval(this.draw.bind(this),16);
 	};
 
 	this.draw = function () {
-		//console.log(this.arrayCartas[0].valor);
-		//this.grafic.draw(this.arrayCartas[0].valor,0);
 		this.grafic.drawMessage(this.estadopartida);
 		for (var i = 0; i < 16; i++) { 
 			if(this.arrayCartas[i].estado == "bocabajo"){
@@ -55,37 +53,51 @@ MemoryGame = function(gs) {
 	Este método se llama cada vez que el jugador pulsa sobre alguna de las cartas (identificada por el número que ocupan en el array de cartas del juego). Es el responsable de voltear la carta y, si hay dos volteadas, comprobar si son la misma (en cuyo caso las marcará como encontradas). En caso de no ser la misma las volverá a poner boca abajo1.
 	*/
 	this.onClick = function (cardID) {
-		this.carta=cardID;
-		this.arrayCartas[this.carta].flip();
-		this.cartavolteada++;
-		this.posotraCarta;
-		if(this.cartavolteada == 2){
-			for (var i = 0; i < 16; i++) { 
-				if((this.arrayCartas[i].estado=="bocarriba")&&(this.arrayCartas[this.carta]!= this.arrayCartas[i])){
-					this.posotraCarta = i;
-				}		
-			}
-			this.arrayCartas[this.carta].compareTo(this.arrayCartas[this.posotraCarta]);
-			if(this.arrayCartas[this.carta].estado!="encontrada"){
-				//window.releaseEvents(Event.CLICK)
-				setTimeout(volteardos.bind(this), 500);
-				//window.captureEvents(Event.CLICK)
-				this.estadopartida="Try Again";
-				/*this.arrayCartas[this.carta].flip();
-				this.arrayCartas[posotraCarta].flip();*/
+		if(this.espera == false){
+			this.carta=cardID;
+			this.arrayCartas[this.carta].flip();
+			//this.cartavolteada++;
+		//	this.posotraCarta;
+			if(this.cartavolteada != 0){
+				/*for (var i = 0; i < 16; i++) { 
+					if((this.arrayCartas[i].estado=="bocarriba")&&(this.arrayCartas[this.carta]!= this.arrayCartas[i])){
+						this.posotraCarta = i;
+					}		
+				}*/
+				this.arrayCartas[this.carta].compareTo(this.cartavolteada);
+				if(this.arrayCartas[this.carta].estado!="encontrada"){
+					//window.releaseEvents(Event.CLICK)
+					this.espera = true; 
+					console.log(this.cartavolteada);
+					setTimeout(volteardos.bind(this), 1000);
+					//window.captureEvents(Event.CLICK)
+					
+					this.estadopartida="Try Again";
+					/*this.arrayCartas[this.carta].flip();
+					this.arrayCartas[posotraCarta].flip();*/
+				}else{
+					this.cartasEncontradas+=2;
+					this.estadopartida="Match Found";
+					this.cartavolteada = 0;
+				}
+				//this.cartavolteada = 0;
+				console.log("acabo de poner a 0");
 			}else{
-				this.cartasEncontradas+=2;
-				this.estadopartida="Match Found";
+				//console.log(this.cartavolteada);
+				this.cartavolteada = this.arrayCartas[this.carta];
+				//console.log(this.cartavolteada);
+				//console.log(this);
 			}
-			this.cartavolteada = 0;
+			if(this.cartasEncontradas==16){
+				this.estadopartida="You Win";
+			}
 		}
-		if(this.cartasEncontradas==16){
-			this.estadopartida="You Win";
-		}
-
 		volteardos = function(){
 			this.arrayCartas[this.carta].flip();
-			this.arrayCartas[this.posotraCarta].flip();
+			console.log(this.cartavolteada);
+			this.cartavolteada.flip();
+			this.espera = false;
+			this.cartavolteada = 0;
 		};
 	};
 };
