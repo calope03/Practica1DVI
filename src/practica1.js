@@ -35,7 +35,8 @@ MemoryGame = function(gs) {
 	};
 
 	this.loop = function () {
-		setInterval(this.draw.bind(this),16);
+		this.pararPartida = setInterval(this.draw.bind(this),16);
+		
 	};
 
 	this.draw = function () {
@@ -48,6 +49,11 @@ MemoryGame = function(gs) {
 			}
 			
 		}
+		if(this.cartasEncontradas==16){
+				this.estadopartida="You Win";
+				this.grafic.drawMessage(this.estadopartida);
+				clearInterval(this.pararPartida);
+		}
 	};
 	/*
 	Este método se llama cada vez que el jugador pulsa sobre alguna de las cartas (identificada por el número que ocupan en el array de cartas del juego). Es el responsable de voltear la carta y, si hay dos volteadas, comprobar si son la misma (en cuyo caso las marcará como encontradas). En caso de no ser la misma las volverá a poner boca abajo1.
@@ -56,45 +62,24 @@ MemoryGame = function(gs) {
 		if(this.espera == false){
 			this.carta=cardID;
 			this.arrayCartas[this.carta].flip();
-			//this.cartavolteada++;
-		//	this.posotraCarta;
 			if(this.cartavolteada != 0){
-				/*for (var i = 0; i < 16; i++) { 
-					if((this.arrayCartas[i].estado=="bocarriba")&&(this.arrayCartas[this.carta]!= this.arrayCartas[i])){
-						this.posotraCarta = i;
-					}		
-				}*/
 				this.arrayCartas[this.carta].compareTo(this.cartavolteada);
 				if(this.arrayCartas[this.carta].estado!="encontrada"){
-					//window.releaseEvents(Event.CLICK)
 					this.espera = true; 
-					console.log(this.cartavolteada);
-					setTimeout(volteardos.bind(this), 1000);
-					//window.captureEvents(Event.CLICK)
-					
+					setTimeout(volteardos.bind(this), 500);
 					this.estadopartida="Try Again";
-					/*this.arrayCartas[this.carta].flip();
-					this.arrayCartas[posotraCarta].flip();*/
 				}else{
 					this.cartasEncontradas+=2;
 					this.estadopartida="Match Found";
 					this.cartavolteada = 0;
 				}
-				//this.cartavolteada = 0;
-				console.log("acabo de poner a 0");
 			}else{
-				//console.log(this.cartavolteada);
 				this.cartavolteada = this.arrayCartas[this.carta];
-				//console.log(this.cartavolteada);
-				//console.log(this);
 			}
-			if(this.cartasEncontradas==16){
-				this.estadopartida="You Win";
-			}
+
 		}
 		volteardos = function(){
 			this.arrayCartas[this.carta].flip();
-			console.log(this.cartavolteada);
 			this.cartavolteada.flip();
 			this.espera = false;
 			this.cartavolteada = 0;
@@ -132,8 +117,8 @@ MemoryGameCard = function(id) {
 	};
 
 	this.compareTo = function (otherCard) {
-		carta1=this;
-		carta2=otherCard;
+		var carta1=this;
+		var carta2=otherCard;
 		if(carta1.valor==carta2.valor){
 			carta1.found();
 			carta2.found();
