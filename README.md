@@ -8,7 +8,7 @@ Esta primera practica consiste en el desarrollo del tipico juego de memoria, en 
 
 El archivo principal sobre el que nosotros hemos realizado los cambios se encuentra en [/src/practica1.js](https://github.com/calope03/Practica1DVI/blob/master/src/practica1.js). El resto de ficheros vienen dados por el profesor.
 
-## Desarrolladores
+## Colaboradores
 
 [César Godino Rodríguez](https://github.com/cloudgrey)
 
