@@ -60,7 +60,7 @@ MemoryGame = function(gs) {
 	*/
 	this.onClick = function (cardID) {
 		if(this.espera == false){
-			if(cardID && this.arrayCartas[this.carta]){
+			if((cardID>=0) && (this.arrayCartas[cardID])){
 				this.carta=cardID;
 				if (this.arrayCartas[this.carta] != this.cartavolteada){
 					this.arrayCartas[this.carta].flip();
