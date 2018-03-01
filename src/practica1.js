@@ -60,23 +60,26 @@ MemoryGame = function(gs) {
 	*/
 	this.onClick = function (cardID) {
 		if(this.espera == false){
-			this.carta=cardID;
-			this.arrayCartas[this.carta].flip();
-			if(this.cartavolteada != 0){
-				this.arrayCartas[this.carta].compareTo(this.cartavolteada);
-				if(this.arrayCartas[this.carta].estado!="encontrada"){
-					this.espera = true; 
-					setTimeout(volteardos.bind(this), 500);
-					this.estadopartida="Try Again";
-				}else{
-					this.cartasEncontradas+=2;
-					this.estadopartida="Match Found";
-					this.cartavolteada = 0;
+			if(cardID && this.arrayCartas[this.carta]){
+				this.carta=cardID;
+				if (this.arrayCartas[this.carta] != this.cartavolteada){
+					this.arrayCartas[this.carta].flip();
+					if(this.cartavolteada != 0){
+						this.arrayCartas[this.carta].compareTo(this.cartavolteada);
+						if(this.arrayCartas[this.carta].estado!="encontrada"){
+							this.espera = true; 
+							setTimeout(volteardos.bind(this), 500);
+							this.estadopartida="Try Again";
+						}else{
+							this.cartasEncontradas+=2;
+							this.estadopartida="Match Found";
+							this.cartavolteada = 0;
+						}
+					}else{
+						this.cartavolteada = this.arrayCartas[this.carta];
+					}
 				}
-			}else{
-				this.cartavolteada = this.arrayCartas[this.carta];
 			}
-
 		}
 		volteardos = function(){
 			this.arrayCartas[this.carta].flip();
