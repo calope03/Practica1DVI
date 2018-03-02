@@ -1,3 +1,4 @@
+
 /**
  * MemoryGame es la clase que representa nuestro juego. Contiene un array con la cartas del juego,
  * el número de cartas encontradas (para saber cuándo hemos terminado el juego) y un texto con el mensaje
@@ -7,98 +8,171 @@ var MemoryGame = MemoryGame || {};
 
 /**
  * Constructora de MemoryGame
-
- Esta clase guarda un array con las cartas y el estado en el que se encuentra el juego en
-cada momento, por lo que es la responsable de decidir cuándo ha terminado el juego.
-También guarda el mensaje que aparece en pantalla y que se irá cambiando a medida
-que interactuamos con el juego. También ha de tener una referencia al servidor gráfico
-para poder dibujar el estado del juego. Esta clase ha de implementar al menos los
-siguientes métodos
+ * @param {CustomGraphicServer} gs el servidor grafico ya cargado y preconfigurado antes de iniciar una partida.
  */
-MemoryGame = function(gs) {
+MemoryGame = function(gs) { 
 
+	//El array que contendrá todas las distintas cartas a encontrar presentes en la partida.
 	this.arrayCartas = [];
-	this.grafic = gs;
+
+	//Esta variable lleva la cuenta de los pares de cartas que se han ido hallando
+	//para saber cuando acaba la partida.
+	this.paresEncontrados = 0;
+
+	//Contiene el estado de la partida y se ira modificando a medida que se avance
+	//e interaccione con las cartas.
+	this.textoEstadoJuego = "Memory Game";
+
+	//Apunta al servidor grafico que se pasa como parametro en la constructora desde el fichero "auxiliar.js".
+	this.servgraf = gs;
+
+	//En esta variable se guarda la primera carta volteada
+	//para tenerla mas accesible en la comparación.
 	this.cartavolteada = 0;
-	this.estadopartida = "Memory Game";
-	this.cartasEncontradas = 0;
+
+	//En esta variable se almacenará el valor necesario para parar setInterval
+	//de la funcion draw una vez se hayan encontrado todas las parejas de cartas.
+	this.intervalId = null;
+
+	//Este booleano se pondra a true para impedir que se volteen (en onClic) 
+	//mas cartas de las permitidas mientras se muestra al jugador brevemente que no ha encontrado una pareja.
 	this.espera = false;
 
-	this.initGame = function () {
-		var cartasPosibles =["8-ball","dinosaur","guy","kronos","potato","rocket","unicorn","zeppelin"];
-		for (var i = 0; i < 16; i+=2) { 
-			this.arrayCartas[i] = new MemoryGameCard(cartasPosibles[i/2]);
-		 	this.arrayCartas[i+1] = new MemoryGameCard(cartasPosibles[i/2]);
+
+	/**
+	 * Dibuja el juego: escribe el mensaje con el estado actual del juego y
+	 * pide a cada una de las cartas del tablero que se dibujen.
+	 */
+	this.draw = function(){
+
+		if(this.paresEncontrados == 8){
+			this.textoEstadoJuego = "You win!!!";
 		}
-		this.arrayCartas = shuffle(this.arrayCartas);
-		this.loop();
-	};
+		this.servgraf.drawMessage(this.textoEstadoJuego);
 
-	this.loop = function () {
-		this.pararPartida = setInterval(this.draw.bind(this),16);
-		
-	};
-
-	this.draw = function () {
-		this.grafic.drawMessage(this.estadopartida);
-		for (var i = 0; i < 16; i++) { 
+		for(i = 0; i < this.arrayCartas.length; i++){
 			if(this.arrayCartas[i].estado == "bocabajo"){
-				this.grafic.draw("back",i);
+				this.servgraf.draw("back",i);
 			}else{
-				this.grafic.draw(this.arrayCartas[i].valor,i);
+				this.servgraf.draw(this.arrayCartas[i].nombreCarta,i);
 			}
 			
 		}
-		if(this.cartasEncontradas==16){
-				this.estadopartida="You Win";
-				this.grafic.drawMessage(this.estadopartida);
-				clearInterval(this.pararPartida);
+
+		if(this.paresEncontrados == 8) clearInterval(this.intervalId);
+	}
+
+	/**
+	 * Es el bucle del juego. Llama al método draw cada 16mś con la función setInterval de Javascript.
+	 */
+	this.loop = function(){
+		this.intervalId = setInterval(this.draw.bind(this), 16);
+	}
+
+	/**
+	 * Dado un array, lo modifica reordenando sus elementos de forma aleatoria y lo devuelve.
+	 * @param {[MemoryGameCard]} array El array de cartas del juego, ordenado segun se cargaron las cartas
+	 * @return {[MemoryGameCard]} El array de cartas del juego ya reordenado de forma aleatoria.
+	 */
+	this.shuffle = function(array) {
+
+		var indiceActual = array.length, valorAux, indiceRandom;
+
+		//Mientras que queden elementos a desordenar...
+		while (indiceActual != 0){
+
+			//Escogemos un elemento sobrante a traves de un indice...
+			indiceRandom = Math.floor(Math.random() * indiceActual);
+			indiceActual--;
+
+			//Y lo intercambiamos con el elemento del indice actual.
+			valorAux = array[indiceActual];
+			array[indiceActual] = array[indiceRandom];
+			array[indiceRandom] = valorAux;
 		}
-	};
-	/*
-	Este método se llama cada vez que el jugador pulsa sobre alguna de las cartas (identificada por el número que ocupan en el array de cartas del juego). Es el responsable de voltear la carta y, si hay dos volteadas, comprobar si son la misma (en cuyo caso las marcará como encontradas). En caso de no ser la misma las volverá a poner boca abajo1.
-	*/
+
+		return array;
+	}
+
+	/**
+	 * Inicializa el juego creando las cartas (2 por cada tipo de carta), desordenándolas y comenzando el bucle de juego.
+	 */
+	this.initGame = function(){ 
+		
+ 	 	var count = 0;
+ 	 	for(nombre in this.servgraf.maps){
+ 	 		if(nombre != "back"){
+	 	 		var carta = new MemoryGameCard(nombre);
+	 	 		this.arrayCartas[count] = carta;
+	 	 		count++;
+ 	 			carta = new MemoryGameCard(nombre);
+	 	 		this.arrayCartas[count] = carta;
+	 	 		count++;
+ 	 		}	
+ 	 	}
+ 	 	this.arrayCartas = this.shuffle(this.arrayCartas);
+ 	 	this.loop();
+	}
+
+	/**
+	 * Dadas dos cartas, cada una de ellas llama a su función flip() cambiar su estado y, por tanto, voltearse.
+	 * @param {MemoryGameCard} carta1 La primera de las dos cartas que se van a voltear.
+	 * @param {MemoryGameCard} carta2 La segunda de las dos cartas que se van a voltear.
+	 */
+	voltea = function(carta1, carta2){
+		carta1.flip();
+		carta2.flip();
+	}
+
+	/**
+	 * Este método se llama cada vez que el jugador pulsa sobre alguna de las cartas. 
+	 * Es el responsable de voltear la carta y, si hay dos volteadas,
+	 * comprobar si son la misma (en cuyo caso las marcará como encontradas). 
+	 * En caso de no ser la misma las volverá a poner boca abajo.
+	 * @param {int} cardID El número de la posicion en el array (tablero) de la carta clickada.
+	 */
 	this.onClick = function (cardID) {
 		if(this.espera == false){
-			if((cardID>=0) && (this.arrayCartas[cardID])){
-				this.carta=cardID;
-				if (this.arrayCartas[this.carta] != this.cartavolteada){
-					this.arrayCartas[this.carta].flip();
+			if(cardID>=0 && this.arrayCartas[cardID]){
+				if (this.arrayCartas[cardID] != this.cartavolteada){
+					this.arrayCartas[cardID].flip();
 					if(this.cartavolteada != 0){
-						this.arrayCartas[this.carta].compareTo(this.cartavolteada);
-						if(this.arrayCartas[this.carta].estado!="encontrada"){
-							this.espera = true; 
-							setTimeout(volteardos.bind(this), 500);
-							this.estadopartida="Try Again";
+						var iguales = false;
+						iguales = this.cartavolteada.compareTo(this.arrayCartas[cardID].nombreCarta);
+						if(!iguales){
+							this.espera = true;
+							var carta1 = this.cartavolteada;
+							var carta2 = this.arrayCartas[cardID]; 
+							var that = this;
+							setTimeout(function() {
+								    voltea(carta1, carta2);
+								    that.espera = false;
+								    that.cartavolteada = 0;
+							}, 500);
+							this.textoEstadoJuego ="Try Again :(";
 						}else{
-							this.cartasEncontradas+=2;
-							this.estadopartida="Match Found";
+							this.cartavolteada.found();
+							this.arrayCartas[cardID].found();
+							this.paresEncontrados++;
+							this.textoEstadoJuego ="Match Found!";
 							this.cartavolteada = 0;
 						}
 					}else{
-						this.cartavolteada = this.arrayCartas[this.carta];
+						this.cartavolteada = this.arrayCartas[cardID];
+						
 					}
 				}
 			}
 		}
-		volteardos = function(){
-			this.arrayCartas[this.carta].flip();
-			this.cartavolteada.flip();
-			this.espera = false;
-			this.cartavolteada = 0;
-		};
 	};
+
 };
 
-function shuffle(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
-    }
-    return array;
- }
+
+//---------------------------------------------------------------------------------------------------
+
+
+
 
 /**
  * Constructora de las cartas del juego. Recibe como parámetro el nombre del sprite que representa la carta.
@@ -107,27 +181,55 @@ function shuffle(array) {
  * @param {string} id Nombre del sprite que representa la carta
  */
 MemoryGameCard = function(id) {
-	this.estado = "bocabajo";
-	this.valor = id;
+	
+	//El nombre (del sprite) de la carta que se esta tratando.
+	this.nombreCarta = id;
 
-	this.flip = function () {
+	//Estado de la carta, el cual se ira actualizando durante la partida acorde a la interaccion con dicha carta.
+	this.estado = "bocabajo";
+
+	/**
+	 * Da la vuelta a la carta, cambiando el estado de la misma.
+	 */
+	this.flip = function(){
 		if(this.estado == "bocabajo"){
 			this.estado = "bocarriba";
-		}
-		else if(this.estado == "bocarriba"){
+		}else if(this.estado == "bocarriba"){
 			this.estado = "bocabajo";
 		}
-	};
+	}
 
-	this.compareTo = function (otherCard) {
-		var carta1=this;
-		var carta2=otherCard;
-		if(carta1.valor==carta2.valor){
-			carta1.found();
-			carta2.found();
-		}
-	};
-	this.found = function() {
+	/**
+	 * Marca una carta como encontrada, cambiando el estado de la misma.
+	 */
+	this.found = function(){
 		this.estado = "encontrada";
 	}
+
+	/**
+	 * Compara dos cartas mediante su nombre, devolviendo true si ambas representan la misma carta.
+	 * @param {string} otherCard Nombre (del sprite) de la carta con la que queremos comparar la carta actual.
+	 * @return {boolean} true si son la misma carta, false si son distintas.
+	 */
+	this.compareTo = function(otherCard){
+		if(this.nombreCarta == otherCard) return true;
+		else return false;
+	}
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
